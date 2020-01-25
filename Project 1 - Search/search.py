@@ -106,30 +106,12 @@ def depthFirstSearch(problem):
         return None
 
 def breadthFirstSearch(problem):
-    """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
+    start_state = problem.getStartState()
     expanded = set()
-    fringe = util.Queue()
-    fringe.push((problem.getStartState(), []))
-
-    while not fringe.isEmpty():
-        current_state, path = fringe.pop()
-        if problem.isGoalState(current_state):
-            return path
-
-        if current_state not in expanded:
-            expanded.add(current_state)
-            for next_state, direction, cost in problem.getSuccessors(current_state):
-                fringe.push((next_state, path + [direction]))
-
-    else:
-        print('No solution found')
-        return None
-
-    "*** YOUR CODE HERE ***"
     prev = {start_state : None}
     fringe = util.Queue()
-    fringe.push(start_state, dist[start_state])
+    fringe.push(start_state)
 
     while not fringe.isEmpty():
         current_state = fringe.pop()
