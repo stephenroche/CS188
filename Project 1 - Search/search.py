@@ -126,11 +126,36 @@ def breadthFirstSearch(problem):
         print('No solution found')
         return None
 
+    "*** YOUR CODE HERE ***"
+    prev = {start_state : None}
+    fringe = util.Queue()
+    fringe.push(start_state, dist[start_state])
+
+    while not fringe.isEmpty():
+        current_state = fringe.pop()
+        if problem.isGoalState(current_state):
+            break
+
+        for next_state, action, cost in problem.getSuccessors(current_state):
+            if next_state not in prev:
+                prev[next_state] = (current_state, action)
+                fringe.push(next_state)
+
+    else:
+        print('No solution found')
+        return None
+
+    path = []
+    while current_state != start_state:
+        path.append(prev[current_state][1])
+        current_state = prev[current_state][0]
+
+    return path[::-1]
+
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
     start_state = problem.getStartState()
-    print(start_state)
     expanded = set()
     prev = {start_state : None}
     dist = {start_state : 0}
