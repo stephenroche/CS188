@@ -216,7 +216,7 @@ class PositionSearchProblem(search.SearchProblem):
         include an illegal move, return 999999.
         """
         if actions == None: return 999999
-        x,y= self.getStartState()
+        x,y = self.getStartState()
         cost = 0
         for action in actions:
             # Check figure out the next state and see whether its' legal
@@ -295,14 +295,15 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return (self.startingPosition, self.corners)
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        current_position, corners_remaining = state
+        return corners_remaining == ()
 
     def getSuccessors(self, state):
         """
@@ -314,6 +315,8 @@ class CornersProblem(search.SearchProblem):
             state, 'action' is the action required to get there, and 'stepCost'
             is the incremental cost of expanding to that successor
         """
+        print('current state:', state)
+        current_position, corners_remaining = state
 
         successors = []
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
@@ -325,6 +328,21 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
+            x, y = current_position
+            dx, dy = Actions.directionToVector(action)
+            next_x, next_y = int(x + dx), int(y + dy)
+            if not self.walls[next_x][next_y]:
+                next_position = (next_x, next_y)
+                cost = 1
+
+                if next_position in corners_remaining:
+                    corners_remaining = list(corners_remaining)
+                    corners_remaining.remove(next_position)
+                    corners_remaining = tuple(corners_remaining)
+
+                next_state = (next_position, corners_remaining)
+                successors.append( ( next_state, action, cost) )
+                print('successor:', ( next_state, action, cost))
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
