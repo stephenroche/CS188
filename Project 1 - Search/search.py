@@ -108,12 +108,58 @@ def depthFirstSearch(problem):
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    expanded = set()
+    fringe = util.Queue()
+    fringe.push((problem.getStartState(), []))
+
+    while not fringe.isEmpty():
+        current_state, path = fringe.pop()
+        if problem.isGoalState(current_state):
+            return path
+
+        if current_state not in expanded:
+            expanded.add(current_state)
+            for next_state, direction, cost in problem.getSuccessors(current_state):
+                fringe.push((next_state, path + [direction]))
+
+    else:
+        print('No solution found')
+        return None
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start_state = problem.getStartState()
+    print(start_state)
+    expanded = set()
+    prev = {start_state : None}
+    dist = {start_state : 0}
+    fringe = util.PriorityQueue()
+    fringe.push(start_state, dist[start_state])
+
+    while not fringe.isEmpty():
+        current_state = fringe.pop()
+        if problem.isGoalState(current_state):
+            break
+
+        if current_state not in expanded:
+            expanded.add(current_state)
+            for next_state, action, cost in problem.getSuccessors(current_state):
+                if next_state not in dist or dist[current_state] + cost < dist[next_state]:
+                    dist[next_state] = dist[current_state] + cost
+                    prev[next_state] = (current_state, action)
+                    fringe.push(next_state, dist[next_state])
+
+    else:
+        print('No solution found')
+        return None
+
+    path = []
+    while current_state != start_state:
+        path.append(prev[current_state][1])
+        current_state = prev[current_state][0]
+
+    return path[::-1]
 
 def nullHeuristic(state, problem=None):
     """
