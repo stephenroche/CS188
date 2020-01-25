@@ -17,7 +17,7 @@ In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
 """
 
-import util.py
+import util
 
 class SearchProblem:
     """
@@ -88,7 +88,7 @@ def depthFirstSearch(problem):
     """
     "*** YOUR CODE HERE ***"
     expanded = set()
-    fringe = Stack()
+    fringe = util.Stack()
     fringe.push((problem.getStartState(), []))
 
     while not fringe.isEmpty():
