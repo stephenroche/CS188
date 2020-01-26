@@ -478,7 +478,43 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    food_list = foodGrid.asList()
+    n_foods = len(food_list)
+    if n_foods == 0:
+        return 0
+
+    # Implement a 'minimum spanning tree' and use the heuristicInfo hash
+    seen = set()
+    seen.add(position)
+    pacman_dist = {}
+    queue = util.Queue()
+    queue.push( (position, 0) )
+    # foods = foodGrid.deepCopy()
+    n_foods_reached = 0
+
+    while n_foods_reached < n_foods:
+        current_position, dist = queue.pop()
+        for direction in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
+            x, y = current_position
+            dx, dy = Actions.directionToVector(direction)
+            next_x, next_y = next_position = (int(x + dx), int(y + dy))
+            if not problem.walls[next_x][next_y] and next_position not in seen:
+                seen.add( next_position )
+                queue.push( (next_position, dist + 1) )
+                if foodGrid[next_x][next_y]:
+                    n_foods_reached += 1
+                    pacman_dist[next_position] = dist + 1
+                    # dist_closest_food = dist + 1
+        
+    dist_closest_food = min(pacman_dist[food] for food in food_list)
+    dist_farthest_food = max(pacman_dist[food] for food in food_list)
+
+    # if dists not in problem.heuristicInfo:
+
+    # dist_closest_food = min(util.manhattanDistance(position, food) for food in foodGrid.asList())
+
+    return dist_farthest_food
+    # return dist_closest_food + (n_foods - 1)
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
