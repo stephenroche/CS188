@@ -315,7 +315,6 @@ class CornersProblem(search.SearchProblem):
             state, 'action' is the action required to get there, and 'stepCost'
             is the incremental cost of expanding to that successor
         """
-        print('current state:', state)
         current_position, corners_remaining = state
 
         successors = []
@@ -336,13 +335,14 @@ class CornersProblem(search.SearchProblem):
                 cost = 1
 
                 if next_position in corners_remaining:
-                    corners_remaining = list(corners_remaining)
-                    corners_remaining.remove(next_position)
-                    corners_remaining = tuple(corners_remaining)
+                    next_corners_remaining = list(corners_remaining)
+                    next_corners_remaining.remove(next_position)
+                    next_corners_remaining = tuple(next_corners_remaining)
+                else:
+                    next_corners_remaining = corners_remaining
 
-                next_state = (next_position, corners_remaining)
+                next_state = (next_position, next_corners_remaining)
                 successors.append( ( next_state, action, cost) )
-                print('successor:', ( next_state, action, cost))
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
