@@ -40,6 +40,7 @@ from game import Actions
 import util
 import time
 import search
+import math
 
 class GoWestAgent(Agent):
     "An agent that goes West until it can't."
@@ -485,12 +486,11 @@ def foodHeuristic(state, problem):
 
     seen = set()
     seen.add(position)
-    pacman_dist = {}
     queue = util.Queue()
     queue.push( (position, 0) )
     n_foods_reached = 0
 
-    while n_foods_reached < n_foods:
+    while n_foods_reached < 1:
         current_position, dist = queue.pop()
         for direction in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
             x, y = current_position
@@ -501,9 +501,64 @@ def foodHeuristic(state, problem):
                 queue.push( (next_position, dist + 1) )
                 if foodGrid[next_x][next_y]:
                     n_foods_reached += 1
-                    dist_farthest_food = dist + 1
+                    dist_closest_food = dist + 1
 
-    return dist_farthest_food
+    if 'dists' not in problem.heuristicInfo:
+        problem.heuristicInfo['dists'] = {}
+        starting_food_grid = problem.start[1]
+        starting_n_foods = len(starting_food_grid.asList())
+
+        for starting_food in starting_food_grid.asList():
+            problem.heuristicInfo['dists'][starting_food] = {}
+            seen = set()
+            seen.add(starting_food)
+            queue = util.Queue()
+            queue.push( (starting_food, 0) )
+            n_foods_reached = 1
+
+            while n_foods_reached < starting_n_foods:
+                current_position, dist = queue.pop()
+                for direction in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
+                    x, y = current_position
+                    dx, dy = Actions.directionToVector(direction)
+                    next_x, next_y = next_position = (int(x + dx), int(y + dy))
+                    if not problem.walls[next_x][next_y] and next_position not in seen:
+                        seen.add( next_position )
+                        queue.push( (next_position, dist + 1) )
+                        if starting_food_grid[next_x][next_y]:
+                            n_foods_reached += 1
+                            problem.heuristicInfo['dists'][starting_food][next_position] = dist + 1
+
+            # print(starting_food, problem.heuristicInfo['dists'][starting_food])
+
+    ### Build MST
+    # Bonus credit: less than 7000 nodes
+    # Distance to farthest: 4137 nodes
+    # MST: 255 nodes (for a 60 move solution)
+
+    # print('!!!!!!!!!!!!!!!!!!')
+    in_mst = set(food_list[:1])
+    out_mst = set(food_list[1:])
+    # print(in_mst)
+    # print(out_mst)
+    mst_size = 0
+    shortest_connection = {}
+    for food_out_mst in out_mst:
+        shortest_connection[food_out_mst] = min(problem.heuristicInfo['dists'][food_out_mst][food_in_mst] for food_in_mst in in_mst)
+    # print(shortest_connection)
+
+    while len(out_mst) > 0:
+        new_food, dist = min( ((food_out_mst, shortest_connection[food_out_mst]) for food_out_mst in out_mst), key=lambda x: x[1])
+        # print(new_food, dist)
+        out_mst.remove(new_food)
+        in_mst.add(new_food)
+        mst_size += dist
+        for food_out_mst in out_mst:
+            shortest_connection[food_out_mst] = min(shortest_connection[food_out_mst], problem.heuristicInfo['dists'][food_out_mst][new_food])
+
+    # print(mst_size)
+
+    return dist_closest_food + mst_size
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
