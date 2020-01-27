@@ -40,6 +40,7 @@ from game import Actions
 import util
 import time
 import search
+import math
 
 class GoWestAgent(Agent):
     "An agent that goes West until it can't."
@@ -504,11 +505,11 @@ def foodHeuristic(state, problem):
                     n_foods_reached += 1
                     dist_closest_food = dist + 1
 
-    if dists not in problem.heuristicInfo:
-        problem.heuristicInfo[dists] = {}
+    if 'dists' not in problem.heuristicInfo:
+        problem.heuristicInfo['dists'] = {}
 
         for starting_food in food_list:
-            problem.heuristicInfo[dists][starting_food] = {}
+            problem.heuristicInfo['dists'][starting_food] = {}
             seen = set()
             seen.add(starting_food)
             queue = util.Queue()
@@ -526,12 +527,18 @@ def foodHeuristic(state, problem):
                         queue.push( (next_position, dist + 1) )
                         if foodGrid[next_x][next_y]:
                             n_foods_reached += 1
-                            problem.heuristicInfo[dists][starting_food][next_position] = dist + 1
+                            problem.heuristicInfo['dists'][starting_food][next_position] = dist + 1
 
     # Build MST
-    node in tree
+    in_mst = set(food_list[:1])
+    out_mst = set(food_list[1:])
+    mst_size = 0
+    shortest_connection = {}
+    for food_out_mst in out_mst:
+        shortest_connection[food_out_mst] = min( ((food_in_mst, problem.heuristicInfo['dists'][food_out_mst][food_in_mst]) for food_in_mst in in_mst), key=lambda x: x[1])
+    print(shortest_connection)
 
-    return 0
+    return dist_closest_food + mst_size
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
