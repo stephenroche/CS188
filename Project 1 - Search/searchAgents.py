@@ -484,12 +484,10 @@ def foodHeuristic(state, problem):
     if n_foods == 0:
         return 0
 
-    # Implement a 'minimum spanning tree' and use the heuristicInfo hash
     seen = set()
     seen.add(position)
     queue = util.Queue()
     queue.push( (position, 0) )
-    # foods = foodGrid.deepCopy()
     n_foods_reached = 0
 
     while n_foods_reached < 1:
@@ -531,30 +529,35 @@ def foodHeuristic(state, problem):
                             n_foods_reached += 1
                             problem.heuristicInfo['dists'][starting_food][next_position] = dist + 1
 
-            print(starting_food, problem.heuristicInfo['dists'][starting_food])
+            # print(starting_food, problem.heuristicInfo['dists'][starting_food])
 
-    # Build MST
-    print('!!!!!!!!!!!!!!!!!!')
+    ### Build MST
+    # Bonus credit: less than 7000 nodes
+    # Distance to farthest: 4137 nodes
+    # MST: 255 nodes (for a 60 move solution)
+
+    # print('!!!!!!!!!!!!!!!!!!')
     in_mst = set(food_list[:1])
     out_mst = set(food_list[1:])
-    print(in_mst)
-    print(out_mst)
+    # print(in_mst)
+    # print(out_mst)
     mst_size = 0
     shortest_connection = {}
     for food_out_mst in out_mst:
         shortest_connection[food_out_mst] = min(problem.heuristicInfo['dists'][food_out_mst][food_in_mst] for food_in_mst in in_mst)
-    print(shortest_connection)
+    # print(shortest_connection)
 
     while len(out_mst) > 0:
         new_food, dist = min( ((food_out_mst, shortest_connection[food_out_mst]) for food_out_mst in out_mst), key=lambda x: x[1])
-        print(new_food, dist)
+        # print(new_food, dist)
         out_mst.remove(new_food)
         in_mst.add(new_food)
         mst_size += dist
         for food_out_mst in out_mst:
             shortest_connection[food_out_mst] = min(shortest_connection[food_out_mst], problem.heuristicInfo['dists'][food_out_mst][new_food])
 
-    print(mst_size)
+    # print(mst_size)
+
     return dist_closest_food + mst_size
 
 class ClosestDotSearchAgent(SearchAgent):
