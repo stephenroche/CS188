@@ -270,7 +270,36 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    position = currentGameState.getPacmanPosition()
+    foodGrid = currentGameState.getFood()
+    ghostStates = currentGameState.getGhostStates()
+    scaredTimes = [ghostState.scaredTimer for ghostState in ghostStates]
+
+    "*** YOUR CODE HERE ***"
+    close_ghosts = sum(-200 for ghost_state in ghostStates if util.manhattanDistance(ghost_state.getPosition(), position) <= 1)
+    
+    if currentGameState.isWin():
+        return currentGameState.getScore()
+
+    seen = set()
+    seen.add(position)
+    queue = util.Queue()
+    queue.push( (position, 0) )
+    dist_to_food = None
+    walls = currentGameState.getWalls()
+    while dist_to_food == None:
+        current_pos, dist = queue.pop()
+        for direction in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
+            x, y = current_pos
+            dx, dy = Actions.directionToVector(direction)
+            next_x, next_y = next_pos = (int(x + dx), int(y + dy))
+            if not walls[next_x][next_y] and next_pos not in seen:
+                seen.add( next_pos )
+                queue.push( (next_pos, dist + 1) )
+                if foodGrid[next_x][next_y]:
+                    dist_to_food = dist + 1
+
+    return currentGameState.getScore() + close_ghosts + 10 / (dist_to_food + 1) + sum(scaredTimes)
 
 # Abbreviation
 better = betterEvaluationFunction
