@@ -15,6 +15,7 @@
 from util import manhattanDistance
 from game import Directions
 import random, util
+import math
 
 from game import Agent, Actions
 
@@ -158,7 +159,28 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        bestScore, bestAction = self.minimax_node(gameState, 0, 0)
+        return bestAction
+
+    def minimax_node(self, gameState, agentIndex, depth):
+        if depth >= self.depth or gameState.isWin() or gameState.isLose():
+            return (self.evaluationFunction(gameState), None)
+
+        if agentIndex == 0:
+            bestScore = -math.inf
+            for action in gameState.getLegalActions(agentIndex):
+                score, _ = self.minimax_node(gameState.generateSuccessor(agentIndex, action), (agentIndex + 1) % gameState.getNumAgents(), depth + (1 if agentIndex == gameState.getNumAgents() - 1 else 0))
+                if score > bestScore:
+                    bestScore, bestAction = score, action
+
+        else:
+            bestScore = math.inf
+            for action in gameState.getLegalActions(agentIndex):
+                score, _ = self.minimax_node(gameState.generateSuccessor(agentIndex, action), (agentIndex + 1) % gameState.getNumAgents(), depth + (1 if agentIndex == gameState.getNumAgents() - 1 else 0))
+                if score < bestScore:
+                    bestScore, bestAction = score, action
+
+        return (bestScore, bestAction)
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
