@@ -159,24 +159,24 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        bestScore, bestAction = self.minimax_node(gameState, 0, 0)
+        bestScore, bestAction = self.minimaxNode(gameState, 0, 0)
         return bestAction
 
-    def minimax_node(self, gameState, agentIndex, depth):
+    def minimaxNode(self, gameState, agentIndex, depth):
         if depth >= self.depth or gameState.isWin() or gameState.isLose():
             return (self.evaluationFunction(gameState), None)
 
         if agentIndex == 0:
             bestScore = -math.inf
             for action in gameState.getLegalActions(agentIndex):
-                score, _ = self.minimax_node(gameState.generateSuccessor(agentIndex, action), (agentIndex + 1) % gameState.getNumAgents(), depth + (1 if agentIndex == gameState.getNumAgents() - 1 else 0))
+                score, _ = self.minimaxNode(gameState.generateSuccessor(agentIndex, action), (agentIndex + 1) % gameState.getNumAgents(), depth + (1 if agentIndex == gameState.getNumAgents() - 1 else 0))
                 if score > bestScore:
                     bestScore, bestAction = score, action
 
         else:
             bestScore = math.inf
             for action in gameState.getLegalActions(agentIndex):
-                score, _ = self.minimax_node(gameState.generateSuccessor(agentIndex, action), (agentIndex + 1) % gameState.getNumAgents(), depth + (1 if agentIndex == gameState.getNumAgents() - 1 else 0))
+                score, _ = self.minimaxNode(gameState.generateSuccessor(agentIndex, action), (agentIndex + 1) % gameState.getNumAgents(), depth + (1 if agentIndex == gameState.getNumAgents() - 1 else 0))
                 if score < bestScore:
                     bestScore, bestAction = score, action
 
@@ -192,7 +192,36 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        bestScore, bestAction = self.alphaBetaNode(gameState, 0, 0, -math.inf, math.inf)
+        return bestAction
+
+    def alphaBetaNode(self, gameState, agentIndex, depth, alpha, beta):
+        if depth >= self.depth or gameState.isWin() or gameState.isLose():
+            return (self.evaluationFunction(gameState), None)
+
+        if agentIndex == 0:
+            bestScore = -math.inf
+            for action in gameState.getLegalActions(agentIndex):
+                score, _ = self.alphaBetaNode(gameState.generateSuccessor(agentIndex, action), (agentIndex + 1) % gameState.getNumAgents(), depth + (1 if agentIndex == gameState.getNumAgents() - 1 else 0), alpha, beta)
+                if score > bestScore:
+                    bestScore, bestAction = score, action
+
+                if bestScore > beta:
+                    return (bestScore, bestAction)
+                alpha = max(alpha, bestScore)
+
+        else:
+            bestScore = math.inf
+            for action in gameState.getLegalActions(agentIndex):
+                score, _ = self.alphaBetaNode(gameState.generateSuccessor(agentIndex, action), (agentIndex + 1) % gameState.getNumAgents(), depth + (1 if agentIndex == gameState.getNumAgents() - 1 else 0), alpha, beta)
+                if score < bestScore:
+                    bestScore, bestAction = score, action
+                    
+                if bestScore < alpha:
+                    return (bestScore, bestAction)
+                beta = min(beta, bestScore)
+
+        return (bestScore, bestAction)
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
