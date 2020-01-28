@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-#
+# 
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -87,17 +87,86 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    expanded = set()
+    fringe = util.Stack()
+    fringe.push((problem.getStartState(), []))
+
+    while not fringe.isEmpty():
+        current_state, path = fringe.pop()
+        if problem.isGoalState(current_state):
+            return path
+
+        if current_state not in expanded:
+            expanded.add(current_state)
+            for next_state, direction, cost in problem.getSuccessors(current_state):
+                fringe.push((next_state, path + [direction]))
+
+    else:
+        print('No solution found')
+        return None
 
 def breadthFirstSearch(problem):
-    """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start_state = problem.getStartState()
+    expanded = set()
+    prev = {start_state : None}
+    fringe = util.Queue()
+    fringe.push(start_state)
+
+    while not fringe.isEmpty():
+        current_state = fringe.pop()
+        if problem.isGoalState(current_state):
+            break
+
+        for next_state, action, cost in problem.getSuccessors(current_state):
+            if next_state not in prev:
+                prev[next_state] = (current_state, action)
+                fringe.push(next_state)
+
+    else:
+        print('No solution found')
+        return None
+
+    path = []
+    while current_state != start_state:
+        path.append(prev[current_state][1])
+        current_state = prev[current_state][0]
+
+    return path[::-1]
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start_state = problem.getStartState()
+    expanded = set()
+    prev = {start_state : None}
+    dist = {start_state : 0}
+    fringe = util.PriorityQueue()
+    fringe.push(start_state, dist[start_state])
+
+    while not fringe.isEmpty():
+        current_state = fringe.pop()
+        if problem.isGoalState(current_state):
+            break
+
+        if current_state not in expanded:
+            expanded.add(current_state)
+            for next_state, action, cost in problem.getSuccessors(current_state):
+                if next_state not in dist or dist[current_state] + cost < dist[next_state]:
+                    dist[next_state] = dist[current_state] + cost
+                    prev[next_state] = (current_state, action)
+                    fringe.push(next_state, dist[next_state])
+
+    else:
+        print('No solution found')
+        return None
+
+    path = []
+    while current_state != start_state:
+        path.append(prev[current_state][1])
+        current_state = prev[current_state][0]
+
+    return path[::-1]
 
 def nullHeuristic(state, problem=None):
     """
@@ -109,7 +178,38 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start_state = problem.getStartState()
+    expanded = set()
+    prev = {start_state : None}
+    dist = {start_state : 0}
+    fringe = util.PriorityQueue()
+    fringe.push(start_state, dist[start_state])
+
+    while not fringe.isEmpty():
+        current_state = fringe.pop()
+        if problem.isGoalState(current_state):
+            break
+
+        if current_state not in expanded:
+            expanded.add(current_state)
+            for next_state, action, cost in problem.getSuccessors(current_state):
+
+                if next_state not in dist or dist[current_state] + cost < dist[next_state]:
+                    dist[next_state] = dist[current_state] + cost
+                    prev[next_state] = (current_state, action)
+
+                fringe.push(next_state, dist[next_state] + heuristic(next_state, problem))
+
+    else:
+        print('No solution found')
+        return None
+
+    path = []
+    while current_state != start_state:
+        path.append(prev[current_state][1])
+        current_state = prev[current_state][0]
+
+    return path[::-1]
 
 
 # Abbreviations

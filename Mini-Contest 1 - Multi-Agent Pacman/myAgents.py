@@ -71,7 +71,7 @@ class ClosestDotAgent(Agent):
 
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return search.breadthFirstSearch(AnyFoodSearchProblem(gameState, self.index))
 
     def getAction(self, state):
         return self.findPathToClosestDot(state)[0]
@@ -107,8 +107,8 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         The state is Pacman's position. Fill this in with a goal test that will
         complete the problem definition.
         """
-        x,y = state
+        x, y = state
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.food[x][y]
 
