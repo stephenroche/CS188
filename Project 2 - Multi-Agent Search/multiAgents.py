@@ -16,7 +16,7 @@ from util import manhattanDistance
 from game import Directions
 import random, util
 
-from game import Agent
+from game import Agent, Actions
 
 class ReflexAgent(Agent):
     """
@@ -74,7 +74,30 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        close_ghosts = sum(-200 for ghost_state in newGhostStates if util.manhattanDistance(ghost_state.getPosition(), newPos) <= 1)
+        
+        if successorGameState.isWin():
+            return 10000
+
+        seen = set()
+        seen.add(newPos)
+        queue = util.Queue()
+        queue.push( (newPos, 0) )
+        dist_to_food = None
+        walls = successorGameState.getWalls()
+        while dist_to_food == None:
+            current_pos, dist = queue.pop()
+            for direction in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
+                x, y = current_pos
+                dx, dy = Actions.directionToVector(direction)
+                next_x, next_y = next_pos = (int(x + dx), int(y + dy))
+                if not walls[next_x][next_y] and next_pos not in seen:
+                    seen.add( next_pos )
+                    queue.push( (next_pos, dist + 1) )
+                    if newFood[next_x][next_y]:
+                        dist_to_food = dist + 1
+
+        return successorGameState.getScore() + close_ghosts + 10 / (dist_to_food + 1)
 
 def scoreEvaluationFunction(currentGameState):
     """
