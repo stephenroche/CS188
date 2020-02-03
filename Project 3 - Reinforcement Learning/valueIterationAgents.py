@@ -149,6 +149,13 @@ class AsynchronousValueIterationAgent(ValueIterationAgent):
 
     def runValueIteration(self):
         "*** YOUR CODE HERE ***"
+        states = self.mdp.getStates()
+        n_states = len(states)
+        for i in range(self.iterations):
+            state = states[i % n_states]
+            actions = self.mdp.getPossibleActions(state)
+            if actions:
+                self.values[state] = max(self.computeQValueFromValues(state, action) for action in actions)
 
 class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
     """
@@ -169,4 +176,31 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
 
     def runValueIteration(self):
         "*** YOUR CODE HERE ***"
+        states = self.mdp.getStates()
+        # print(states)
+        predecesors = {}
+        for prevState in states:
+            for action in self.mdp.getPossibleActions(prevState):
+                for state, prob in self.mdp.getTransitionStatesAndProbs(prevState, action):
+                    if state not in predecesors:
+                        predecesors[state] = set()
+                    predecesors[state].add(prevState)
 
+        PQueue = util.PriorityQueue()
+        for state in states:
+            if not self.mdp.isTerminal(state):
+                diff = abs(self.values[state] - max(self.getQValue(state, action) for action in self.mdp.getPossibleActions(state)))
+                PQueue.push(state, -diff)
+                # print(state, diff)
+
+        for _ in range(self.iterations):
+            if PQueue.isEmpty():
+                break
+
+            state = PQueue.pop()
+            self.values[state] = max(self.getQValue(state, action) for action in self.mdp.getPossibleActions(state))
+
+            for prevState in predecesors[state]:
+                diff = abs(self.values[prevState] - max(self.getQValue(prevState, action) for action in self.mdp.getPossibleActions(prevState)))
+                if diff > self.theta:
+                    PQueue.update(prevState, -diff)
