@@ -75,7 +75,10 @@ class DiscreteDistribution(dict):
         {}
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        sum = self.total()
+        if sum:
+            for key in self.keys():
+                self[key] /= sum
 
     def sample(self):
         """
@@ -99,7 +102,13 @@ class DiscreteDistribution(dict):
         0.0
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        random_number = random.random() * self.total()
+        sum = 0
+        for key in self.keys():
+            sum += self[key]
+            if sum >= random_number:
+                return key
+
 
 
 class InferenceModule:
@@ -169,7 +178,16 @@ class InferenceModule:
         Return the probability P(noisyDistance | pacmanPosition, ghostPosition).
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        if noisyDistance == None:
+            return 1 if ghostPosition == jailPosition else 0
+
+        else:
+            if ghostPosition == jailPosition:
+                return 0
+
+            trueDistance = manhattanDistance(pacmanPosition, ghostPosition)
+            return busters.getObservationProbability(noisyDistance, trueDistance)
+
 
     def setGhostPosition(self, gameState, ghostPosition, index):
         """
@@ -277,7 +295,14 @@ class ExactInference(InferenceModule):
         position is known.
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        pacmanPosition = gameState.getPacmanPosition()
+        jailPosition = self.getJailPosition()
+
+        # totalObservationProbability = sum(self.beliefs[ghostPosition] * self.getObservationProbability(observation, pacmanPosition, ghostPosition, jailPosition) for ghostPosition in self.allPositions)
+        # print('totalObservationProbability:', totalObservationProbability)
+
+        for ghostPosition in self.allPositions:
+            self.beliefs[ghostPosition] *= self.getObservationProb(observation, pacmanPosition, ghostPosition, jailPosition)
 
         self.beliefs.normalize()
 
