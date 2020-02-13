@@ -65,17 +65,17 @@ class RegressionModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
-        self.layer1_size = 20
-        # self.layer2Size = 20
+        self.layer1_size = 100
+        self.layer2_size = 100 # Set to 1 to bascially remove second hidden layer
         self.w01 = nn.Parameter(1, self.layer1_size)
         self.b1 = nn.Parameter(1, self.layer1_size)
-        self.w12 = nn.Parameter(self.layer1_size, 1)
-        self.b2 = nn.Parameter(1, 1)
-        # self.w12 = nn.Parameter(self.layer1_size, self.layer2Size)
-        # self.b2 = nn.Parameter(1, self.layer2Size)
-        # self.w23 = nn.Parameter(self.layer2Size, 1)
-        # self.b3 = nn.Parameter(1, 1)
-        self.learning_rate = 0.05
+        # self.w12 = nn.Parameter(self.layer1_size, 1)
+        # self.b2 = nn.Parameter(1, 1)
+        self.w12 = nn.Parameter(self.layer1_size, self.layer2_size)
+        self.b2 = nn.Parameter(1, self.layer2_size)
+        self.w23 = nn.Parameter(self.layer2_size, 1)
+        self.b3 = nn.Parameter(1, 1)
+        self.learning_rate = 0.1
 
     def run(self, x):
         """
@@ -88,7 +88,8 @@ class RegressionModel(object):
         """
         "*** YOUR CODE HERE ***"
         layer1_values = nn.ReLU(nn.AddBias(nn.Linear(x, self.w01), self.b1))
-        predicted_y = nn.AddBias(nn.Linear(layer1_values, self.w12), self.b2)
+        layer2_values = nn.ReLU(nn.AddBias(nn.Linear(layer1_values, self.w12), self.b2))
+        predicted_y = nn.AddBias(nn.Linear(layer2_values, self.w23), self.b3)
 
         return predicted_y
 
@@ -113,6 +114,22 @@ class RegressionModel(object):
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+        loss_threshold = 0.02 / 10
+        batch_size = 200
+
+        for x, y in dataset.iterate_forever(batch_size):
+            loss = self.get_loss(x, y)
+            # print(nn.as_scalar(loss))
+            if nn.as_scalar(loss) < loss_threshold:
+                break
+
+            parameters = [self.w01, self.b1, self.w12, self.b2, self.w23, self.b3]
+
+            gradients = nn.gradients(loss, parameters)
+
+            for i in range(len(parameters)):
+                parameters[i].update(gradients[i], -self.learning_rate)
+
 
 class DigitClassificationModel(object):
     """
