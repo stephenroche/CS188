@@ -65,6 +65,17 @@ class RegressionModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
+        self.layer1_size = 20
+        # self.layer2Size = 20
+        self.w01 = nn.Parameter(1, self.layer1_size)
+        self.b1 = nn.Parameter(1, self.layer1_size)
+        self.w12 = nn.Parameter(self.layer1_size, 1)
+        self.b2 = nn.Parameter(1, 1)
+        # self.w12 = nn.Parameter(self.layer1_size, self.layer2Size)
+        # self.b2 = nn.Parameter(1, self.layer2Size)
+        # self.w23 = nn.Parameter(self.layer2Size, 1)
+        # self.b3 = nn.Parameter(1, 1)
+        self.learning_rate = 0.05
 
     def run(self, x):
         """
@@ -76,6 +87,10 @@ class RegressionModel(object):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         "*** YOUR CODE HERE ***"
+        layer1_values = nn.ReLU(nn.AddBias(nn.Linear(x, self.w01), self.b1))
+        predicted_y = nn.AddBias(nn.Linear(layer1_values, self.w12), self.b2)
+
+        return predicted_y
 
     def get_loss(self, x, y):
         """
@@ -88,6 +103,10 @@ class RegressionModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
+        predicted_y = self.run(x)
+        loss = nn.SquareLoss(predicted_y, y)
+
+        return loss
 
     def train(self, dataset):
         """
