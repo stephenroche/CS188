@@ -166,7 +166,7 @@ class DigitClassificationModel(object):
         # self.b3 = nn.Parameter(1, self.layer3_size)
         # self.w34 = nn.Parameter(self.layer3_size, self.output_layer_size)
         # self.b4 = nn.Parameter(1, self.output_layer_size)
-        self.learning_rate = 0.5
+        self.learning_rate = 1
 
     def run(self, x):
         """
@@ -216,7 +216,7 @@ class DigitClassificationModel(object):
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
-        accuracy_threshold = 0.975
+        accuracy_threshold = 0.98
         batch_size = 100
         last_test = time.time()
 
