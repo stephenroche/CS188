@@ -1,4 +1,5 @@
 import nn
+import time
 
 class PerceptronModel(object):
     def __init__(self, dimensions):
@@ -148,6 +149,20 @@ class DigitClassificationModel(object):
     def __init__(self):
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
+        self.input_layer_size = 28 * 28
+        self.layer1_size = 256
+        self.layer2_size = 128
+        self.layer3_size = 64
+        self.output_layer_size = 10
+        self.w01 = nn.Parameter(self.input_layer_size, self.layer1_size)
+        self.b1 = nn.Parameter(1, self.layer1_size)
+        self.w12 = nn.Parameter(self.layer1_size, self.layer2_size)
+        self.b2 = nn.Parameter(1, self.layer2_size)
+        self.w23 = nn.Parameter(self.layer2_size, self.layer3_size)
+        self.b3 = nn.Parameter(1, self.layer3_size)
+        self.w34 = nn.Parameter(self.layer3_size, self.output_layer_size)
+        self.b4 = nn.Parameter(1, self.output_layer_size)
+        self.learning_rate = 0.01
 
     def run(self, x):
         """
@@ -164,6 +179,12 @@ class DigitClassificationModel(object):
                 (also called logits)
         """
         "*** YOUR CODE HERE ***"
+        layer1_values = nn.ReLU(nn.AddBias(nn.Linear(x, self.w01), self.b1))
+        layer2_values = nn.ReLU(nn.AddBias(nn.Linear(layer1_values, self.w12), self.b2))
+        layer3_values = nn.ReLU(nn.AddBias(nn.Linear(layer2_values, self.w23), self.b3))
+        predicted_y = nn.AddBias(nn.Linear(layer3_values, self.w34), self.b4)
+
+        return predicted_y
 
     def get_loss(self, x, y):
         """
@@ -179,12 +200,32 @@ class DigitClassificationModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
+        predicted_y = self.run(x)
+        loss = nn.SoftmaxLoss(predicted_y, y)
+
+        return loss
 
     def train(self, dataset):
         """
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+        accuracy_threshold = 0.98
+        batch_size = 1000
+        last_test = time.time()
+
+        for x, y in dataset.iterate_forever(batch_size):
+            if time.time() - last_test > 5:
+                last_test = time.time()
+                if dataset.get_validation_accuracy() >= accuracy_threshold:
+                    break
+
+            loss = self.get_loss(x, y)
+            parameters = [self.w01, self.b1, self.w12, self.b2, self.w23, self.b3, self.w34, self.b4]
+            gradients = nn.gradients(loss, parameters)
+
+            for i in range(len(parameters)):
+                parameters[i].update(gradients[i], -self.learning_rate)
 
 class LanguageIDModel(object):
     """
