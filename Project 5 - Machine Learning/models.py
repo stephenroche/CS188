@@ -251,6 +251,15 @@ class LanguageIDModel(object):
 
         # Initialize your model parameters here
         "*** YOUR CODE HERE ***"
+        self.num_languages = len(self.languages)
+        self.hidden_size = 100
+        self.w_letter = nn.Parameter(self.num_chars, self.hidden_size)
+        self.w_hidden = nn.Parameter(self.hidden_size, self.hidden_size)
+        self.b_hidden = nn.Parameter(1, self.hidden_size)
+        self.w_final = nn.Parameter(self.hidden_size, self.num_languages)
+        self.b_final = nn.Parameter(1, self. num_languages)
+
+        self.learning_rate = 0.1
 
     def run(self, xs):
         """
@@ -282,6 +291,13 @@ class LanguageIDModel(object):
                 (also called logits)
         """
         "*** YOUR CODE HERE ***"
+        f = nn.ReLU(nn.AddBias(nn.Linear(xs[0], self.w_letter), self.b_hidden))
+        for letter_i in range(1, len(xs)):
+            f = nn.ReLU(nn.AddBias(nn.Add(nn.Linear(xs[letter_i], self.w_letter), nn.Linear(f, self.w_hidden)), self.b_hidden))
+
+        predicted_y = nn.AddBias(nn.Linear(f, self.w_final), self.b_final)
+
+        return predicted_y
 
     def get_loss(self, xs, y):
         """
@@ -298,9 +314,29 @@ class LanguageIDModel(object):
         Returns: a loss node
         """
         "*** YOUR CODE HERE ***"
+        predicted_y = self.run(xs)
+        loss = nn.SoftmaxLoss(predicted_y, y)
+
+        return loss
 
     def train(self, dataset):
         """
         Trains the model.
         """
         "*** YOUR CODE HERE ***"
+        accuracy_threshold = 0.85
+        batch_size = 100
+        last_test = time.time()
+
+        for x, y in dataset.iterate_forever(batch_size):
+            if time.time() - last_test > 5:
+                last_test = time.time()
+                if dataset.get_validation_accuracy() >= accuracy_threshold:
+                    break
+
+            loss = self.get_loss(x, y)
+            parameters = [self.w_letter, self.w_hidden, self.b_hidden, self.w_final, self.b_final]
+            gradients = nn.gradients(loss, parameters)
+
+            for i in range(len(parameters)):
+                parameters[i].update(gradients[i], -self.learning_rate)
