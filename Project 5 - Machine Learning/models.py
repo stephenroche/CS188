@@ -329,7 +329,7 @@ class LanguageIDModel(object):
         last_test = time.time()
 
         for x, y in dataset.iterate_forever(batch_size):
-            if time.time() - last_test > 5:
+            if time.time() - last_test > 3:
                 last_test = time.time()
                 if dataset.get_validation_accuracy() >= accuracy_threshold:
                     break
